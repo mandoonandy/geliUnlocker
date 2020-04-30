@@ -23,6 +23,7 @@ unlockgeli_start()
 		eval key=\${unlockgeli_${_g}_key}
 		eval key_identityfile=\${unlockgeli_${_g}_key_identityfile}
 		eval key_enc_pw=\${unlockgeli_${_g}_key_enc_pw}
+		eval key_digest=\${unlockgeli_${_g}_key_digest:+"-md "\${unlockgeli_${_g}_key_digest}}
 		eval passphrase=\${unlockgeli_${_g}_passphrase}
 		eval passphrase_identityfile=\${unlockgeli_${_g}_passphrase_identityfile}
 		eval passphrase_enc_pw=\${unlockgeli_${_g}_passphrase_enc_pw}
@@ -37,7 +38,7 @@ unlockgeli_start()
 		if [ -n "${key_enc_pw}" ]; then
 			echo "Decrypting keyfile"
 			mv $keytempfile ${keytempfile}.aes
-			openssl enc -aes-256-cbc -a -salt -d -in ${keytempfile}.aes -out $keytempfile -k "${key_enc_pw}"
+			openssl enc -aes-256-cbc -a -salt -d -in ${keytempfile}.aes -out $keytempfile -k "${key_enc_pw}" ${key_digest}
 			if [ "$?" -ne "0" ]; then
 			    warn "Unable to decrypt identity file ${key}"
 			fi
@@ -52,7 +53,7 @@ unlockgeli_start()
 			if [ -n "${passphrase_enc_pw}" ]; then
 				echo "Decrypting passphrase file"
 				mv $pwtempfile ${pwtempfile}.aes
-				openssl enc -aes-256-cbc -a -salt -d -in ${pwtempfile}.aes -out $pwtempfile -k "${passphrase_enc_pw}"
+				openssl enc -aes-256-cbc -a -salt -d -in ${pwtempfile}.aes -out $pwtempfile -k "${passphrase_enc_pw}" ${key_digest}
 				if [ "$?" -ne "0" ]; then
 				    warn "Unable to decrypt passphrase file ${passphrase}"
 				fi
